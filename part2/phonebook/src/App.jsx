@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+import services from "./services/phonebook";
+
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
@@ -13,9 +15,7 @@ const App = () => {
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((response) => setPersons(response.data));
+    services.getAll().then((initialData) => setPersons(initialData));
   }, []);
 
   const handleAddNewPerson = (e) => {
@@ -30,13 +30,16 @@ const App = () => {
       (person) => person.name === newPerson.name
     );
 
+    // TODO FIX
     if (duplicates.length) {
       alert(`Sorry, ${newPerson.name} is already in Phonebook!`);
       setNewName("");
     } else {
-      setPersons(persons.concat(newPerson));
-      setNewName("");
-      setNewNumber("");
+      services.create(newPerson).then((newPersonData) => {
+        setPersons(persons.concat(newPersonData));
+        setNewName("");
+        setNewNumber("");
+      });
     }
   };
 
@@ -51,6 +54,8 @@ const App = () => {
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
   };
+
+  console.log(persons);
 
   const filteredPersons = persons.filter((person) =>
     person.name.toLowerCase().includes(filter.toLowerCase())
