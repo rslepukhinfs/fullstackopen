@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 
 import services from "./services/phonebook";
 
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
-import Persons from "./components/Persons";
+import PersonsList from "./components/PersonsList";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -14,10 +13,12 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
 
+  // GET ALL ENTRIES
   useEffect(() => {
     services.getAll().then((initialData) => setPersons(initialData));
   }, []);
 
+  // ADD NEW ENTRY
   const handleAddNewPerson = (e) => {
     e.preventDefault();
 
@@ -30,16 +31,38 @@ const App = () => {
       (person) => person.name === newPerson.name
     );
 
-    // TODO FIX
     if (duplicates.length) {
-      alert(`Sorry, ${newPerson.name} is already in Phonebook!`);
-      setNewName("");
+      const confirmUpdate = window.confirm(
+        `${newPerson.name} is already on the list. Do you want to update number?`
+      );
+      if (confirmUpdate) {
+        const currentPerson = duplicates[0];
+        services
+          .replace(currentPerson.id, newPerson)
+          .then((changedPerson) =>
+            setPersons(
+              persons.map((p) =>
+                p.id !== changedPerson.id ? p : changedPerson
+              )
+            )
+          );
+        console.log(persons);
+      }
     } else {
       services.create(newPerson).then((newPersonData) => {
         setPersons(persons.concat(newPersonData));
         setNewName("");
         setNewNumber("");
       });
+    }
+  };
+
+  // DELETE ENTRY
+  const handleDeleteEntry = (id) => {
+    const deletion = window.confirm("Are you sure?");
+    if (deletion) {
+      services.remove(id);
+      setPersons(persons.filter((person) => person.id !== id));
     }
   };
 
@@ -54,8 +77,6 @@ const App = () => {
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
   };
-
-  console.log(persons);
 
   const filteredPersons = persons.filter((person) =>
     person.name.toLowerCase().includes(filter.toLowerCase())
@@ -74,7 +95,10 @@ const App = () => {
         onNumberChange={handleNumberChange}
       />
 
-      <Persons filteredPersons={filteredPersons} />
+      <PersonsList
+        filteredPersons={filteredPersons}
+        onDeleteEntry={handleDeleteEntry}
+      />
     </div>
   );
 };
