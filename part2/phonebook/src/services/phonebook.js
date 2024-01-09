@@ -11,7 +11,7 @@ const create = (personObj) => {
 };
 
 const remove = (id) => {
-  axios.delete(`${url}/${id}`);
+  return axios.delete(`${url}/${id}`);
 };
 
 const replace = (id, personObj) => {
