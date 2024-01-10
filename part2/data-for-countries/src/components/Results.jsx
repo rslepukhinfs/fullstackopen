@@ -1,4 +1,4 @@
-import React from "react";
+import CountryInfo from "./CountryInfo";
 
 const Results = ({ countries, country }) => {
   if (country === "") {
@@ -13,7 +13,9 @@ const Results = ({ countries, country }) => {
     return (
       <ul>
         {countries.map((country) => (
-          <li key={country.name.common}>{country.name.common}</li>
+          <li key={country.name.common}>
+            <CountryInfo country={country} />
+          </li>
         ))}
       </ul>
     );
@@ -21,16 +23,7 @@ const Results = ({ countries, country }) => {
 
   return (
     <div>
-      <h2>{countries[0].name.common}</h2>
-      <h3>Capital: {countries[0].capital[0]}</h3>
-      <h3>Area: {countries[0].area}</h3>
-      <h4>Languages:</h4>
-      <ul>
-        {Object.values(countries[0].languages).map((l) => (
-          <li>{l}</li>
-        ))}
-      </ul>
-      <img src={countries[0].flags.png} alt="Country flag" />
+      <CountryInfo country={countries[0]} />
     </div>
   );
 };
